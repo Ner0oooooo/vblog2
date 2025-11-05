@@ -36,11 +36,7 @@ public class UploadFactory implements ApplicationContextAware {
     }
 
     public static UploadService getUploadService(SysConfigService sysConfigService) {
-        String enable = sysConfigService.selectConfigByKey(CacheConstants.A_LI_YUN_ENABLE_CODE);
-        if (OPEN.equals(enable)) {
-            return uploadServiceMap.get(UploadCode.A_LI_YUN);
-        } else {
-            return uploadServiceMap.get(UploadCode.LOCAL);
-        }
+        // 强制使用本地存储
+        return uploadServiceMap.get(UploadCode.LOCAL);
     }
 }
