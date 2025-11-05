@@ -44,3 +44,7 @@ vue-admin/README.md
 vue-admin/README-zh.md
 vue-admin/node_modules
 vue-admin/dist
+
+# vue-front-desk
+vue-front-desk/node_modules
+vue-front-desk/dist
