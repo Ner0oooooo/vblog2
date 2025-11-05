@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
     public R error(Exception e) {
         log.error(ExceptionUtil.getMessage(e));
         e.printStackTrace();
-        return R.error().message("执行了全局异常处理");
+        return R.error().message("执行了全局异常处理: " + e.getMessage());
     }
 
 
