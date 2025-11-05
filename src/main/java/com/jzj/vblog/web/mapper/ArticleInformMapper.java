@@ -26,7 +26,7 @@ public interface ArticleInformMapper extends BaseMapper<ArticleInform> {
     /**
      * 前台分页查询文章列表
      */
-    Page<ArticleVo> selectPageVo(@Param("page") Page<ArticleVo> page, @Param("tagId") String tagId,@Param("summaryId") String summaryId);
+    Page<ArticleVo> selectPageVo(@Param("page") Page<ArticleVo> page, @Param("tagId") String tagId,@Param("summaryId") String summaryId, @Param("keyword") String keyword);
 
     /**
      * 根据id获取文章

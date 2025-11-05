@@ -82,6 +82,13 @@
             <if test="summaryId!=null and summaryId!=''">
                 AND aggregate_id LIKE concat('%',#{summaryId},'%')
             </if>
+            <if test="keyword!=null and keyword!=''">
+                AND (
+                    ai.article_title LIKE concat('%',#{keyword},'%')
+                    OR ai.introduce LIKE concat('%',#{keyword},'%')
+                    OR ai.article_tag LIKE concat('%',#{keyword},'%')
+                )
+            </if>
         </where>
         <choose>
             <when test="summaryId!=null and summaryId!=''">

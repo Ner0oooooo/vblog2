@@ -60,7 +60,14 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
     @Override
     public List<ArticleInform> selectList(ArticleInform entity) {
         //获取标签列表
-        List<SysDictData> tagList = dictTypeService.selectDictDataByType(CacheConstants.SYS_ARTICLE_TAG);
+        List<SysDictData> tagList = null;
+        try {
+            tagList = dictTypeService.selectDictDataByType(CacheConstants.SYS_ARTICLE_TAG);
+            log.info("获取标签列表成功，数量: {}", tagList != null ? tagList.size() : 0);
+        } catch (Exception e) {
+            log.error("获取标签列表失败: " + e.getMessage(), e);
+            tagList = new ArrayList<>();
+        }
         List<ArticleInform> articleList = articleInformMapper.selectArticleList(entity);
         /* 封装标签 */
         for (ArticleInform inform : articleList) {
@@ -78,16 +85,27 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
 
     @Override
     public HashMap<String, Object> listPage(Map<String, Object> query) {
+        log.info("开始查询文章列表，参数: {}", query);
         HashMap<String, Object> map = new HashMap<>();
         //获取查询条件
         Integer page = (Integer) query.get("currPage");
         Integer limit = (Integer) query.get("limit");
         String tagId = (String) query.get("tagId");
         String summaryId = (String) query.get("summaryId");
+        String keyword = (String) query.get("keyword");
+        log.info("查询参数 - page: {}, limit: {}, tagId: {}, summaryId: {}, keyword: {}", page, limit, tagId, summaryId, keyword);
         //分页查询
-        Page<ArticleVo> pageList = articleInformMapper.selectPageVo(new Page<>(page, limit), tagId, summaryId);
+        Page<ArticleVo> pageList = articleInformMapper.selectPageVo(new Page<>(page, limit), tagId, summaryId, keyword);
+        log.info("查询结果 - 总数: {}, 当前页数据: {}", pageList.getTotal(), pageList.getRecords().size());
         //获取标签列表
-        List<SysDictData> tagList = dictTypeService.selectDictDataByType(CacheConstants.SYS_ARTICLE_TAG);
+        List<SysDictData> tagList = null;
+        try {
+            tagList = dictTypeService.selectDictDataByType(CacheConstants.SYS_ARTICLE_TAG);
+            log.info("获取标签列表成功，数量: {}", tagList != null ? tagList.size() : 0);
+        } catch (Exception e) {
+            log.error("获取标签列表失败: " + e.getMessage(), e);
+            tagList = new ArrayList<>();
+        }
         if (pageList.getTotal() > 0) {
             //获取列表
             List<ArticleVo> list = pageList.getRecords();
@@ -98,10 +116,15 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
                 //封装标签
                 List<String> tags = getTags(tagList, s.getTagIds());
                 s.setTagNameArray(tags.toArray(new String[tags.size()]));
-                String key = CacheConstants.VBLOG_ARTICLE_CLICK + s.getId();
-                if (redisCache.hasKey(key)) {
-                    Number count = redisCache.getCacheObject(key);
-                    s.setViewsCount(count.longValue());
+                try {
+                    String key = CacheConstants.VBLOG_ARTICLE_CLICK + s.getId();
+                    if (redisCache.hasKey(key)) {
+                        Number count = redisCache.getCacheObject(key);
+                        s.setViewsCount(count.longValue());
+                    }
+                } catch (Exception e) {
+                    log.warn("Redis连接异常，使用默认点击量: " + e.getMessage());
+                    // 使用数据库中的点击量作为默认值
                 }
             });
             map.put("items", list);
@@ -125,10 +148,6 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
         inform.setCreateBy(information.getWebName());
         inform.setNumberLike(0L);
         inform.setCommentNumber(0);
-        articleInformMapper.insert(inform);
-        //文章内容
-        ArticleContent content = new ArticleContent();
-        content.setId(inform.getId());
         content.setContent(vo.getContent());
         content.setHtmlContent(vo.getHtmlContent());
         return articleContentMapper.insert(content);

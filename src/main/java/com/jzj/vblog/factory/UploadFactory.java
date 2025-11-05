@@ -42,5 +42,9 @@ public class UploadFactory implements ApplicationContextAware {
         } else {
             return uploadServiceMap.get(UploadCode.LOCAL);
         }
+            return uploadServiceMap.get(UploadCode.A_LI_YUN);
+        } else {
+            return uploadServiceMap.get(UploadCode.LOCAL);
+        }
     }
 }
