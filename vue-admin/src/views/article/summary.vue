@@ -399,7 +399,7 @@ export default {
       const id = row.id || this.ids
       getInfo(id).then(response => {
         this.form = response.data
-        this.imgPath = this.form.resourceImg
+        this.imgPath = this.form.banner
         this.open = true
         this.title = '修改资源'
       })

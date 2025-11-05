@@ -125,6 +125,10 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
         inform.setCreateBy(information.getWebName());
         inform.setNumberLike(0L);
         inform.setCommentNumber(0);
+        //设置默认发布状态
+        if (vo.getStatus() == null) {
+            inform.setStatus("1");
+        }
         articleInformMapper.insert(inform);
         //文章内容
         ArticleContent content = new ArticleContent();
