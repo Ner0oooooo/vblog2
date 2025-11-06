@@ -1,7 +1,5 @@
 package com.jzj.vblog.utils.sign;
 
-import com.sun.xml.internal.ws.util.UtilException;
-
 /**
  * <p>
  * sql操作工具类
@@ -29,7 +27,7 @@ public class SqlUtil {
     {
         if (StringUtils.isNotEmpty(value) && !isValidOrderBySql(value))
         {
-            throw new UtilException("参数不符合规范，不能进行查询");
+            throw new IllegalArgumentException("参数不符合规范，不能进行查询");
         }
         return value;
     }
@@ -56,7 +54,7 @@ public class SqlUtil {
         {
             if (StringUtils.indexOfIgnoreCase(value, sqlKeyword) > -1)
             {
-                throw new UtilException("参数存在SQL注入风险");
+                throw new IllegalArgumentException("参数存在SQL注入风险");
             }
         }
     }

@@ -1,8 +1,5 @@
 package com.jzj.vblog.utils.uuid;
 
-
-import com.sun.xml.internal.ws.util.UtilException;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -470,7 +467,7 @@ public final class UUID implements java.io.Serializable, Comparable<UUID> {
         }
         catch (NoSuchAlgorithmException e)
         {
-            throw new UtilException(e);
+            throw new RuntimeException("SHA1PRNG algorithm not available", e);
         }
     }
 
