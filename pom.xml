@@ -100,6 +100,14 @@
             <version>1.2.80</version>
         </dependency>
 
+        <!-- Apache Commons Text - 用于字符串处理和差异对比 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.9</version>
+        </dependency>
+        </dependency>
+
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>

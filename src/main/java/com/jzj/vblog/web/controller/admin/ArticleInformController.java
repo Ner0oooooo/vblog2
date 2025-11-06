@@ -86,5 +86,13 @@ public class ArticleInformController extends BaseController {
     public R getRank() {
         return R.ok(articleInformService.getRank());
     }
+
+    @Log(title = "文章管理", businessType = BusinessType.UPDATE)
+    @ApiOperation("回滚文章到指定版本")
+    @PutMapping("/rollback")
+    @PreAuthorize("hasAuthority('btn.article.edit')")
+    public R rollbackToVersion(@RequestParam String articleId, @RequestParam String versionId) {
+        return toAjax(articleInformService.rollbackToVersion(articleId, versionId));
+    }
 }
 
