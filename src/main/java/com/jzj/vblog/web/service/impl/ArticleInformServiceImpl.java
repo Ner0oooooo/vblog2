@@ -63,16 +63,18 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
         List<SysDictData> tagList = dictTypeService.selectDictDataByType(CacheConstants.SYS_ARTICLE_TAG);
         List<ArticleInform> articleList = articleInformMapper.selectArticleList(entity);
         /* 封装标签 */
-        for (ArticleInform inform : articleList) {
-            List<String> tags = getTags(tagList, inform.getArticleTag());
-            inform.setArticleTagList(tags);
-            String key = CacheConstants.VBLOG_ARTICLE_CLICK + inform.getId();
-            if (redisCache.hasKey(key)) {
-                Number count = redisCache.getCacheObject(key);
-                inform.setClickRate(count.longValue());
+        if (articleList != null && !articleList.isEmpty()) {
+            for (ArticleInform inform : articleList) {
+                List<String> tags = getTags(tagList, inform.getArticleTag());
+                inform.setArticleTagList(tags);
+                String key = CacheConstants.VBLOG_ARTICLE_CLICK + inform.getId();
+                if (redisCache.hasKey(key)) {
+                    Number count = redisCache.getCacheObject(key);
+                    inform.setClickRate(count.longValue());
+                }
             }
         }
-        return articleList;
+        return articleList != null ? articleList : new ArrayList<>();
     }
 
 
@@ -92,9 +94,13 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
             //获取列表
             List<ArticleVo> list = pageList.getRecords();
             list.forEach(s -> {
-                String[] imgArray = s.getLogImg().split(",");
                 //封装轮播图
-                s.setBanner(imgArray);
+                if (StringUtils.isNotEmpty(s.getLogImg())) {
+                    String[] imgArray = s.getLogImg().split(",");
+                    s.setBanner(imgArray);
+                } else {
+                    s.setBanner(new String[0]);
+                }
                 //封装标签
                 List<String> tags = getTags(tagList, s.getTagIds());
                 s.setTagNameArray(tags.toArray(new String[tags.size()]));
@@ -305,8 +311,11 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
     }
 
     private List<String> getTags(List<SysDictData> tagList, String tagIds) {
-        String[] tagArray = tagIds.split(",");
         List<String> tags = new ArrayList<>();
+        if (StringUtils.isEmpty(tagIds) || tagList == null || tagList.isEmpty()) {
+            return tags;
+        }
+        String[] tagArray = tagIds.split(",");
         //封装标签
         for (String tag : tagArray) {
             for (SysDictData sysDictData : tagList) {
