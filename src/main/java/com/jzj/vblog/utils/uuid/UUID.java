@@ -1,7 +1,7 @@
 package com.jzj.vblog.utils.uuid;
 
 
-import com.sun.xml.internal.ws.util.UtilException;
+import com.jzj.vblog.utils.result.BusinessException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -470,7 +470,7 @@ public final class UUID implements java.io.Serializable, Comparable<UUID> {
         }
         catch (NoSuchAlgorithmException e)
         {
-            throw new UtilException(e);
+            throw new BusinessException("生成UUID失败", 500, e);
         }
     }
 
