@@ -122,4 +122,13 @@ public interface ArticleInformService extends IService<ArticleInform> {
      * @return 列表
      */
     List<SwiperVo> getArticleListKw(String kw);
+
+    /**
+     * 回滚文章到指定版本
+     *
+     * @param articleId 文章ID
+     * @param versionId 版本ID
+     * @return 操作结果
+     */
+    boolean rollbackToVersion(String articleId, String versionId);
 }

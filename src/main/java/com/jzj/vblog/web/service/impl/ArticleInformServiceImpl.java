@@ -57,6 +57,9 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private ArticleVersionService articleVersionService;
+
     @Override
     public List<ArticleInform> selectList(ArticleInform entity) {
         //获取标签列表
@@ -131,7 +134,20 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
         content.setId(inform.getId());
         content.setContent(vo.getContent());
         content.setHtmlContent(vo.getHtmlContent());
-        return articleContentMapper.insert(content);
+        int result = articleContentMapper.insert(content);
+        
+        // 创建初始版本
+        if (result > 0) {
+            articleVersionService.createVersion(
+                inform.getId(),
+                inform.getArticleTitle(),
+                vo.getContent(),
+                information.getWebName(),
+                "初始版本"
+            );
+        }
+        
+        return result;
     }
 
     @Override
@@ -154,7 +170,22 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
         content.setContent(vo.getContent());
         content.setHtmlContent(vo.getHtmlContent());
         content.setId(vo.getId());
-        return articleContentMapper.updateById(content);
+        int result = articleContentMapper.updateById(content);
+        
+        // 创建新版本
+        if (result > 0) {
+            // 获取站点信息作为创建人
+            SysWebInformation information = webInformationService.selectWebInformationById();
+            articleVersionService.createVersion(
+                vo.getId(),
+                inform.getArticleTitle(),
+                vo.getContent(),
+                information.getWebName(),
+                "更新版本"
+            );
+        }
+        
+        return result;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -273,6 +304,47 @@ public class ArticleInformServiceImpl extends ServiceImpl<ArticleInformMapper, A
             }
         }
         return this.updateBatchById(informs);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean rollbackToVersion(String articleId, String versionId) {
+        // 查询指定版本
+        ArticleVersion version = articleVersionService.getVersionById(Long.parseLong(versionId));
+        if (version == null) {
+            throw new BusinessException("版本不存在");
+        }
+
+        // 更新文章基础信息
+        ArticleInform inform = articleInformMapper.selectById(articleId);
+        if (inform == null) {
+            throw new BusinessException("文章不存在");
+        }
+        inform.setArticleTitle(version.getTitle());
+        articleInformMapper.updateById(inform);
+
+        // 更新文章内容
+        ArticleContent content = articleContentMapper.selectById(articleId);
+        if (content == null) {
+            content = new ArticleContent();
+            content.setId(Long.parseLong(articleId));
+        }
+        content.setContent(version.getContent());
+        // HTML内容需要重新生成，这里简单处理
+        content.setHtmlContent(version.getContent());
+        articleContentMapper.insertOrUpdate(content);
+
+        // 创建新版本（内容同回滚版本）
+        SysWebInformation information = webInformationService.selectWebInformationById();
+        articleVersionService.createVersion(
+            Long.parseLong(articleId),
+            version.getTitle(),
+            version.getContent(),
+            information.getWebName(),
+            "回滚到版本 " + version.getVersionNumber()
+        );
+
+        return true;
     }
 
     @Override
