@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzj.vblog.web.mapper.CommentReportMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jzj.vblog.web.pojo.entity.CommentReport">
+        <id column="id" property="id" />
+        <result column="comment_id" property="commentId" />
+        <result column="user_id" property="userId" />
+        <result column="reason" property="reason" />
+        <result column="status" property="status" />
+        <result column="result" property="result" />
+        <result column="handle_user_id" property="handleUserId" />
+        <result column="handle_time" property="handleTime" />
+        <result column="create_by" property="createBy" />
+        <result column="create_time" property="createTime" />
+        <result column="update_by" property="updateBy" />
+        <result column="update_time" property="updateTime" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <!-- 评论举报VO结果 -->
+    <resultMap id="CommentReportVoResult" type="com.jzj.vblog.web.pojo.vo.CommentReportVo">
+        <id column="id" property="id" />
+        <result column="comment_id" property="commentId" />
+        <result column="content" property="commentContent" />
+        <result column="user_id" property="userId" />
+        <result column="nick_name" property="userNickname" />
+        <result column="reason" property="reason" />
+        <result column="status" property="status" />
+        <result column="result" property="result" />
+        <result column="handle_user_id" property="handleUserId" />
+        <result column="handle_nick_name" property="handleUserNickname" />
+        <result column="handle_time" property="handleTime" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 查询评论举报列表 -->
+    <select id="selectCommentReportList" parameterType="com.jzj.vblog.web.pojo.entity.CommentReport" resultMap="CommentReportVoResult">
+        SELECT cr.*, ac.content, u.nick_name, hu.nick_name AS handle_nick_name
+        FROM comment_report cr
+        LEFT JOIN article_comment ac ON cr.comment_id = ac.id
+        LEFT JOIN sys_user u ON cr.user_id = u.user_id
+        LEFT JOIN sys_user hu ON cr.handle_user_id = hu.user_id
+        <where>
+            <if test="commentId != null and commentId != ''">
+                AND cr.comment_id = #{commentId}
+            </if>
+            <if test="userId != null and userId != ''">
+                AND cr.user_id = #{userId}
+            </if>
+            <if test="status != null and status != ''">
+                AND cr.status = #{status}
+            </if>
+            <if test="result != null and result != ''">
+                AND cr.result = #{result}
+            </if>
+        </where>
+        ORDER BY cr.create_time DESC
+    </select>
+
+    <!-- 查询评论举报详情 -->
+    <select id="selectCommentReportById" parameterType="String" resultMap="CommentReportVoResult">
+        SELECT cr.*, ac.content, u.nick_name, hu.nick_name AS handle_nick_name
+        FROM comment_report cr
+        LEFT JOIN article_comment ac ON cr.comment_id = ac.id
+        LEFT JOIN sys_user u ON cr.user_id = u.user_id
+        LEFT JOIN sys_user hu ON cr.handle_user_id = hu.user_id
+        WHERE cr.id = #{id}
+    </select>
+
+</mapper>
