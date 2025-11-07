@@ -21,3 +21,11 @@ export function getListArticle(articleId) {
     method: 'get'
   })
 }
+
+export function reportComment(data) {
+  return request({
+    url: `/front/comment/report`,
+    method: 'post',
+    data: data
+  })
+}

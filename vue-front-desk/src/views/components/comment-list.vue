@@ -18,6 +18,9 @@
             </h5> {{ comment.response }}
           </div>
           <div v-html="comment.message" class="comment-detail-body-bottom"></div>
+          <div class="comment-detail-foot">
+            <a @click="reportComment(comment.id)">举报</a>
+          </div>
         </div>
       </div>
     </li>
@@ -26,6 +29,7 @@
 
 <script>
 import blogComment from './blog-comment';
+import { reportComment } from '@/api/comment';
 
 export default {
   name: 'commentItem',
@@ -41,7 +45,31 @@ export default {
       }
     }
   },
-  methods: {}
+  methods: {
+    reportComment(commentId) {
+      this.$confirm('确定要举报这条评论吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 调用举报API
+        reportComment({
+          commentId: commentId,
+          reason: '内容违规'
+        }).then(response => {
+          if (response.data.code === 200) {
+            this.$message.success('举报成功');
+          } else {
+            this.$message.error('举报失败');
+          }
+        }).catch(error => {
+          this.$message.error('举报失败');
+        });
+      }).catch(() => {
+        this.$message.info('已取消举报');
+      });
+    }
+  }
 }
 </script>
 
